@@ -21,6 +21,7 @@ export function CompanyPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [isFormOpen, setIsFormOpen] = useState(false)
 
   const fetchCompanies = async () => {
     setLoading(true)
@@ -55,6 +56,21 @@ export function CompanyPage() {
   const resetForm = () => {
     setForm(emptyForm)
     setEditingId(null)
+  }
+
+  const openCreateForm = () => {
+    resetForm()
+    setIsFormOpen(true)
+  }
+
+  const openEditForm = (company: Company) => {
+    handleEdit(company)
+    setIsFormOpen(true)
+  }
+
+  const closeForm = () => {
+    setIsFormOpen(false)
+    resetForm()
   }
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -147,116 +163,12 @@ export function CompanyPage() {
           </div>
         </section>
 
-        <section className="app-card mb-5 p-4">
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <p className="text-sm font-semibold text-slate-900">{editingId ? 'Edit Company' : 'New Company'}</p>
-            {editingId && (
-              <button type="button" className="btn btn-ghost btn-sm" onClick={resetForm}>
-                Cancel
-              </button>
-            )}
-          </div>
-
-          <form className="erp-form md:grid-cols-2" onSubmit={handleSubmit}>
-            <label className="erp-field text-sm font-medium text-slate-700">
-              <span>Code</span>
-              <input
-                className="erp-input"
-                value={form.code}
-                onChange={(event) => handleChange('code', event.target.value)}
-                required
-              />
-            </label>
-
-            <label className="erp-field text-sm font-medium text-slate-700">
-              <span>Name (TH)</span>
-              <input
-                className="erp-input"
-                value={form.nameTh}
-                onChange={(event) => handleChange('nameTh', event.target.value)}
-                required
-              />
-            </label>
-
-            <label className="erp-field text-sm font-medium text-slate-700">
-              <span>Name (EN)</span>
-              <input
-                className="erp-input"
-                value={form.nameEn ?? ''}
-                onChange={(event) => handleChange('nameEn', event.target.value)}
-              />
-            </label>
-
-            <label className="erp-field text-sm font-medium text-slate-700">
-              <span>Tax ID</span>
-              <input
-                className="erp-input"
-                value={form.taxId ?? ''}
-                onChange={(event) => handleChange('taxId', event.target.value)}
-              />
-            </label>
-
-            <label className="erp-field text-sm font-medium text-slate-700">
-              <span>Phone</span>
-              <input
-                className="erp-input"
-                value={form.phone ?? ''}
-                onChange={(event) => handleChange('phone', event.target.value)}
-              />
-            </label>
-
-            <label className="erp-field text-sm font-medium text-slate-700">
-              <span>Email</span>
-              <input
-                className="erp-input"
-                value={form.email ?? ''}
-                onChange={(event) => handleChange('email', event.target.value)}
-              />
-            </label>
-
-            <label className="erp-field text-sm font-medium text-slate-700 md:col-span-2">
-              <span>Website</span>
-              <input
-                className="erp-input"
-                value={form.website ?? ''}
-                onChange={(event) => handleChange('website', event.target.value)}
-              />
-            </label>
-
-            <label className="erp-field text-sm font-medium text-slate-700 md:col-span-2">
-              <span>Address</span>
-              <textarea
-                className="erp-textarea"
-                rows={3}
-                value={form.address ?? ''}
-                onChange={(event) => handleChange('address', event.target.value)}
-              />
-            </label>
-
-            <label className="erp-inline-check md:col-span-2">
-              <input
-                type="checkbox"
-                className="erp-checkbox"
-                checked={form.isActive}
-                onChange={(event) => handleChange('isActive', event.target.checked)}
-              />
-              Active
-            </label>
-
-            <div className="md:col-span-2 flex justify-end">
-              <button type="submit" className="erp-primary-btn" disabled={isSubmitting}>
-                {isSubmitting ? 'Saving...' : editingId ? 'Save Changes' : 'Add Company'}
-              </button>
-            </div>
-          </form>
-
-          {error && <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>}
-        </section>
+        {error && <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>}
 
         <section className="app-card p-4">
           <div className="mb-4 flex items-center justify-between gap-3">
             <p className="text-sm font-semibold text-slate-900">Companies</p>
-            <button type="button" className="btn btn-sm " onClick={resetForm}>
+            <button type="button" className="erp-primary-btn px-4 py-2 text-sm" onClick={openCreateForm}>
               New
             </button>
           </div>
@@ -295,7 +207,7 @@ export function CompanyPage() {
                       </td>
                       <td>
                         <div className="flex gap-2">
-                          <button type="button" className="btn btn-ghost btn-xs" onClick={() => handleEdit(company)}>
+                          <button type="button" className="btn btn-ghost btn-xs" onClick={() => openEditForm(company)}>
                             Edit
                           </button>
                           <button type="button" className="btn btn-error btn-xs" onClick={() => handleDelete(company.id)}>
@@ -311,6 +223,123 @@ export function CompanyPage() {
           )}
         </section>
       </div>
+
+      {isFormOpen && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center bg-slate-900/45 p-4 backdrop-blur-[2px]">
+          <div className="absolute inset-0" onClick={closeForm} aria-hidden="true" />
+
+          <div className="relative z-10 w-full max-w-4xl overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-violet-700">Company</p>
+                <h2 className="text-xl font-semibold text-slate-900">{editingId ? 'Edit Company' : 'New Company'}</h2>
+              </div>
+
+              <button type="button" className="btn btn-ghost btn-sm" onClick={closeForm}>
+                Close
+              </button>
+            </div>
+
+            <div className="px-5 py-5">
+              <form className="erp-form md:grid-cols-2" onSubmit={handleSubmit}>
+                <label className="erp-field text-sm font-medium text-slate-700">
+                  <span>Code</span>
+                  <input
+                    className="erp-input"
+                    value={form.code}
+                    onChange={(event) => handleChange('code', event.target.value)}
+                    required
+                  />
+                </label>
+
+                <label className="erp-field text-sm font-medium text-slate-700">
+                  <span>Name (TH)</span>
+                  <input
+                    className="erp-input"
+                    value={form.nameTh}
+                    onChange={(event) => handleChange('nameTh', event.target.value)}
+                    required
+                  />
+                </label>
+
+                <label className="erp-field text-sm font-medium text-slate-700">
+                  <span>Name (EN)</span>
+                  <input
+                    className="erp-input"
+                    value={form.nameEn ?? ''}
+                    onChange={(event) => handleChange('nameEn', event.target.value)}
+                  />
+                </label>
+
+                <label className="erp-field text-sm font-medium text-slate-700">
+                  <span>Tax ID</span>
+                  <input
+                    className="erp-input"
+                    value={form.taxId ?? ''}
+                    onChange={(event) => handleChange('taxId', event.target.value)}
+                  />
+                </label>
+
+                <label className="erp-field text-sm font-medium text-slate-700">
+                  <span>Phone</span>
+                  <input
+                    className="erp-input"
+                    value={form.phone ?? ''}
+                    onChange={(event) => handleChange('phone', event.target.value)}
+                  />
+                </label>
+
+                <label className="erp-field text-sm font-medium text-slate-700">
+                  <span>Email</span>
+                  <input
+                    className="erp-input"
+                    value={form.email ?? ''}
+                    onChange={(event) => handleChange('email', event.target.value)}
+                  />
+                </label>
+
+                <label className="erp-field text-sm font-medium text-slate-700 md:col-span-2">
+                  <span>Website</span>
+                  <input
+                    className="erp-input"
+                    value={form.website ?? ''}
+                    onChange={(event) => handleChange('website', event.target.value)}
+                  />
+                </label>
+
+                <label className="erp-field text-sm font-medium text-slate-700 md:col-span-2">
+                  <span>Address</span>
+                  <textarea
+                    className="erp-textarea"
+                    rows={3}
+                    value={form.address ?? ''}
+                    onChange={(event) => handleChange('address', event.target.value)}
+                  />
+                </label>
+
+                <label className="erp-inline-check md:col-span-2">
+                  <input
+                    type="checkbox"
+                    className="erp-checkbox"
+                    checked={form.isActive}
+                    onChange={(event) => handleChange('isActive', event.target.checked)}
+                  />
+                  Active
+                </label>
+
+                <div className="md:col-span-2 flex justify-end gap-3">
+                  <button type="button" className="btn btn-ghost" onClick={closeForm}>
+                    Cancel
+                  </button>
+                  <button type="submit" className="erp-primary-btn" disabled={isSubmitting}>
+                    {isSubmitting ? 'Saving...' : editingId ? 'Save Changes' : 'Add Company'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   )
 }
