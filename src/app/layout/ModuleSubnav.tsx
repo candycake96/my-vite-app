@@ -59,21 +59,37 @@ export function ModuleSubnav({
 
   const { pathname } = useLocation()
 
-  const moduleKey = pathname.startsWith('/budget')
+  const moduleKey = pathname === '/' || pathname.startsWith('/home')
+    ? 'home'
+    : pathname.startsWith('/budget')
     ? 'budget'
     : pathname.startsWith('/inventory')
     ? 'inventory'
+    : pathname.startsWith('/people')
+    ? 'people'
     : pathname.startsWith('/master-data')
     ? 'master-data'
     : 'root'
 
   const menus: Record<string, Array<{ to: string; icon: React.ReactNode; label: string; count?: number; disabled?: boolean }>> = {
+    home: [
+      { to: '/home', icon: <LayoutDashboard size={18} />, label: 'หน้าแรก' },
+      { to: '/people', icon: <UserRound size={18} />, label: 'พนักงาน', count: 86 },
+      { to: '#', icon: <Settings size={18} />, label: 'ตั้งค่า', disabled: true },
+    ],
     'master-data': [
       { to: '/master-data/overview', icon: <LayoutDashboard size={18} />, label: 'ภาพรวม' },
       { to: '/master-data/org', icon: <Building2 size={18} />, label: 'องค์กร', count: 3 },
       { to: '/master-data/company', icon: <Boxes size={18} />, label: 'บริษัท', count: 12 },
       { to: '/master-data/branch', icon: <ContactRound size={18} />, label: 'สาขา', count: 4 },
-      { to: '#', icon: <UserRound size={18} />, label: 'พนักงาน', count: 86, disabled: true },
+      { to: '/master-data/side', icon: <UserRound size={18} />, label: 'ฝ่าย', count: 86 },
+      { to: '/master-data/department', icon: <ClipboardList size={18} />, label: 'แผนก', count: 12 },
+      { to: '/master-data/position', icon: <FileText size={18} />, label: 'ตำแหน่ง', count: 12 },
+      { to: '/master-data/job-title', icon: <FileText size={18} />, label: 'Job Title', count: 12 },
+      { to: '#', icon: <Settings size={18} />, label: 'ตั้งค่า', disabled: true },
+    ],
+    people: [
+      { to: '/people', icon: <UserRound size={18} />, label: 'พนักงาน', count: 86 },
       { to: '#', icon: <Settings size={18} />, label: 'ตั้งค่า', disabled: true },
     ],
     budget: [
@@ -90,10 +106,22 @@ export function ModuleSubnav({
       { to: '#', icon: <ChartNoAxesCombined size={18} />, label: 'ปรับปรุงสต็อก', disabled: true },
       { to: '#', icon: <FileText size={18} />, label: 'Ledger', disabled: true },
     ],
+
     root: [],
   }
 
   const currentMenu = menus[moduleKey] || menus['master-data']
+
+  const moduleTitles: Record<string, { title: string; subtitle: string }> = {
+    home: { title: 'Home', subtitle: 'หน้าแรก' },
+    'master-data': { title: 'Master Data', subtitle: 'ข้อมูลพื้นฐานระบบ' },
+    people: { title: 'People', subtitle: 'ข้อมูลพนักงาน' },
+    budget: { title: 'Budget', subtitle: 'การบริหารงบประมาณ' },
+    inventory: { title: 'Inventory', subtitle: 'จัดการสินค้าคงคลัง' },
+    root: { title: 'Home', subtitle: 'หน้าแรก' },
+  }
+
+  const currentTitle = moduleTitles[moduleKey] || moduleTitles['master-data']
 
   return (
     <aside className={classes}>
@@ -114,8 +142,8 @@ export function ModuleSubnav({
         </div>
 
         <div>
-          <h2 className="text-base font-semibold">Master Data</h2>
-          <p className="text-xs text-slate-500">ข้อมูลพื้นฐานระบบ</p>
+          <h2 className="text-base font-semibold">{currentTitle.title}</h2>
+          <p className="text-xs text-slate-500">{currentTitle.subtitle}</p>
         </div>
       </div>
 

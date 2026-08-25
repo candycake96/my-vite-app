@@ -24,25 +24,27 @@ function RailLink({ to, children, match }: { to: string; children: React.ReactNo
 export function IconRail() {
   const { pathname } = useLocation()
 
+  const isHome = pathname === '/' || pathname.startsWith('/home')
   const isMaster = pathname.startsWith('/master-data')
   const isBudget = pathname.startsWith('/budget')
   const isInventory = pathname.startsWith('/inventory')
+  const isPeople = pathname.startsWith('/people') || isHome
 
   return (
     <aside className="hidden lg:flex w-16 flex-col items-center gap-3 border-r border-[var(--app-border)] bg-white/80 py-4 h-full shrink-0 overflow-y-auto">
-      <RailLink to="/" match={pathname === '/'}>
+      <RailLink to="/home" match={isHome}>
         <Home size={21} />
       </RailLink>
 
-      <RailLink to="/master-data/org" match={isMaster}>
+      <RailLink to="/master-data/org" match={isMaster && pathname.startsWith('/master-data/org')}>
         <FileText size={21} />
       </RailLink>
 
-      <RailLink to="/budget/plans" match={isBudget}>
+      <RailLink to="/budget/plans" match={isBudget && pathname.startsWith('/budget/plans')}>
         <ChartNoAxesCombined size={21} />
       </RailLink>
 
-      <RailLink to="/inventory/stock-count" match={isInventory}>
+      <RailLink to="/inventory/stock-count" match={isInventory && pathname.startsWith('/inventory/stock-count')}>
         <ShoppingCart size={21} />
       </RailLink>
 
@@ -50,7 +52,7 @@ export function IconRail() {
         <Package size={21} />
       </RailLink>
 
-      <RailLink to="/master-data/org" match={isMaster}>
+      <RailLink to="/people" match={isPeople}>
         <UserRound size={21} />
       </RailLink>
 
