@@ -207,10 +207,10 @@ export function CompanyPage() {
                       </td>
                       <td>
                         <div className="flex gap-2">
-                          <button type="button" className="btn btn-ghost btn-xs" onClick={() => openEditForm(company)}>
+                          <button type="button" className="erp-action-btn erp-action-btn--edit" onClick={() => openEditForm(company)}>
                             Edit
                           </button>
-                          <button type="button" className="btn btn-error btn-xs" onClick={() => handleDelete(company.id)}>
+                          <button type="button" className="erp-action-btn erp-action-btn--delete" onClick={() => handleDelete(company.id)}>
                             Delete
                           </button>
                         </div>
@@ -235,7 +235,7 @@ export function CompanyPage() {
                 <h2 className="text-xl font-semibold text-slate-900">{editingId ? 'Edit Company' : 'New Company'}</h2>
               </div>
 
-              <button type="button" className="btn btn-ghost btn-sm" onClick={closeForm}>
+              <button type="button" className="erp-action-btn erp-action-btn--delete btn-sm" onClick={closeForm}>
                 Close
               </button>
             </div>

@@ -6,7 +6,9 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',
+        // Use IPv4 explicitly. On Windows, `localhost` can resolve to ::1 while
+        // the API server listens only on 127.0.0.1, which makes Vite return 502.
+        target: 'http://127.0.0.1:3000',
         changeOrigin: true,
       },
     },

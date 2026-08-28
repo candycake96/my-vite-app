@@ -283,6 +283,38 @@ pre {
   cursor: not-allowed;
 }
 
+.erp-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2rem;
+  border-radius: 0.7rem;
+  border: 1px solid transparent;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease,
+    opacity 150ms ease;
+}
+
+.erp-action-btn:hover {
+  transform: translateY(-1px);
+}
+
+.erp-action-btn--edit {
+  background: rgba(124, 58, 237, 0.08);
+  border-color: rgba(124, 58, 237, 0.15);
+  color: #5b21b6;
+}
+
+.erp-action-btn--delete {
+  background: rgba(220, 38, 38, 0.08);
+  border-color: rgba(220, 38, 38, 0.16);
+  color: #b91c1c;
+}
+
 .app-muted {
   color: var(--app-text-muted);
 }

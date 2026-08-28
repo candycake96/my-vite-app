@@ -85,7 +85,8 @@ export function ModuleSubnav({
       { to: '/master-data/side', icon: <UserRound size={18} />, label: 'ฝ่าย', count: 86 },
       { to: '/master-data/department', icon: <ClipboardList size={18} />, label: 'แผนก', count: 12 },
       { to: '/master-data/position', icon: <FileText size={18} />, label: 'ตำแหน่ง', count: 12 },
-      { to: '/master-data/job-title', icon: <FileText size={18} />, label: 'Job Title', count: 12 },
+      { to: '/master-data/employee-group', icon: <UserRound size={18} />, label: 'กลุ่มพนักงาน' },
+      { to: '#', icon: <FileText size={18} />, label: 'Job Title', disabled: true },
       { to: '#', icon: <Settings size={18} />, label: 'ตั้งค่า', disabled: true },
     ],
     people: [
