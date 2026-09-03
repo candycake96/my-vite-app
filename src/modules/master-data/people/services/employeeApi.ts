@@ -33,6 +33,31 @@ export type Employee = {
   updatedAt?: string
 }
 
+export type EmployeePayload = {
+  companyId: string
+  branchId: string
+  departmentId: string
+  positionId: string
+  sideId: string
+  employeeGroupId: string | null
+  jobTitleId: string | null
+  employeeCode: string
+  firstName: string
+  lastName: string
+  nickname: string | null
+  email: string | null
+  phone: string | null
+  isActive: boolean
+  addresses: Array<{
+    address1: string
+    address2: string | null
+    city: string
+    state: string
+    postalCode: string
+    country: string
+  }>
+}
+
 const API_URL = '/api/employee'
 
 function unwrapResponse<T>(data: unknown): T {
@@ -70,10 +95,10 @@ async function requestJson<T>(url: string, options?: RequestInit): Promise<T> {
 
 export const employeeApi = {
   list: () => requestJson<Employee[]>(API_URL),
-  create: (payload: Partial<Employee>) => requestJson<Employee>(API_URL, {
+  create: (payload: EmployeePayload) => requestJson<Employee>(API_URL, {
     method: 'POST', body: JSON.stringify(payload),
   }),
-  update: (id: string, payload: Partial<Employee>) => requestJson<Employee>(`${API_URL}/${id}`, {
+  update: (id: string, payload: EmployeePayload) => requestJson<Employee>(`${API_URL}/${id}`, {
     method: 'PUT', body: JSON.stringify(payload),
   }),
   remove: (id: string) => requestJson<void>(`${API_URL}/${id}`, { method: 'DELETE' }),

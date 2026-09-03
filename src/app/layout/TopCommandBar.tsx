@@ -1,4 +1,6 @@
 import * as Icons from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 const { Bell, Building2, ChevronDown, Layers3, Menu, Search, WalletCards } = Icons
 
@@ -9,6 +11,29 @@ export function TopCommandBar({
   onToggleSidebar?: () => void
   sidebarOpen?: boolean
 }) {
+  const navigate = useNavigate()
+  const [user, setUser] = useState<{ username?: string; firstName?: string } | null>(null)
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('user')
+      if (raw) setUser(JSON.parse(raw))
+      else setUser(null)
+    } catch (e) {
+      setUser(null)
+    }
+  }, [])
+
+  function handleLogout() {
+    localStorage.removeItem('accessToken')
+    localStorage.removeItem('user')
+    setUser(null)
+    navigate('/login')
+  }
+
+  function handleLogin() {
+    navigate('/login')
+  }
 
   return (
     <header className="sticky top-0 z-50 h-16 w-full flex items-center gap-3 border-b border-[var(--app-border)] bg-base-100/90 px-4 backdrop-blur">
@@ -67,17 +92,28 @@ export function TopCommandBar({
         </div>
       </button>
 
-      <button className="btn btn-ghost gap-2">
-        <div className="avatar placeholder">
-          <div className="w-9 rounded-full bg-violet-100 text-violet-700">
-            <span>AD</span>
-          </div>
+      {user ? (
+        <div className="flex items-center gap-2">
+          <button className="btn btn-ghost gap-2">
+            <div className="avatar placeholder">
+              <div className="w-9 rounded-full bg-violet-100 text-violet-700">
+                <span>{(user.firstName || user.username || 'U').slice(0, 2).toUpperCase()}</span>
+              </div>
+            </div>
+            <span className="hidden text-sm font-medium text-slate-700 md:inline">
+              {user.firstName || user.username}
+            </span>
+            <ChevronDown size={16} />
+          </button>
+          <button onClick={handleLogout} className="btn btn-ghost">
+            Sign out
+          </button>
         </div>
-        <span className="hidden text-sm font-medium text-slate-700 md:inline">
-          Admin
-        </span>
-        <ChevronDown size={16} />
-      </button>
+      ) : (
+        <button onClick={handleLogin} className="btn btn-primary">
+          Sign in
+        </button>
+      )}
     </header>
   )
 }

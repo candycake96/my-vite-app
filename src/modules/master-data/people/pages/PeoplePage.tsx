@@ -5,7 +5,7 @@ import { departmentApi, type Department } from '../../department/services/depart
 import { employeeGroupApi, type EmployeeGroup } from '../../employee-group/services/employeeGroupApi'
 import { positionApi, type Position } from '../../position/services/positionApi'
 import { sideApi, type Side } from '../../side/services/sideApi'
-import { employeeApi, type Employee, type EmployeeAddress } from '../services/employeeApi'
+import { employeeApi, type Employee, type EmployeeAddress, type EmployeePayload } from '../services/employeeApi'
 
 type Lookups = { companies: Company[]; branches: Branch[]; departments: Department[]; positions: Position[]; sides: Side[]; groups: EmployeeGroup[] }
 const emptyAddress: EmployeeAddress = { address1: '', address2: '', city: '', state: '', postalCode: '', country: 'Thailand' }
@@ -17,6 +17,7 @@ export function PeoplePage() {
   const [lookups, setLookups] = useState<Lookups>(emptyLookups)
   const [form, setForm] = useState<Employee>(emptyForm)
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [detailEmployee, setDetailEmployee] = useState<Employee | null>(null)
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [loading, setLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -62,12 +63,12 @@ export function PeoplePage() {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault(); setIsSubmitting(true); setError('')
-    const payload: Partial<Employee> = {
+    const payload: EmployeePayload = {
       companyId: form.companyId, branchId: form.branchId, departmentId: form.departmentId, positionId: form.positionId, sideId: form.sideId,
-      employeeGroupId: form.employeeGroupId || null, jobTitleId: form.jobTitleId || null, userId: form.userId || null,
+      employeeGroupId: form.employeeGroupId || null, jobTitleId: form.jobTitleId || null,
       employeeCode: form.employeeCode.trim(), firstName: form.firstName.trim(), lastName: form.lastName.trim(), nickname: form.nickname?.trim() || null,
       email: form.email?.trim() || null, phone: form.phone?.trim() || null, isActive: form.isActive,
-      employeeAddresses: form.employeeAddresses.map(toAddressPayload),
+      addresses: form.employeeAddresses.map(toAddressPayload),
     }
     try {
       if (editingId) {
@@ -96,13 +97,46 @@ export function PeoplePage() {
         <td><div>{names.company.get(employee.companyId) || employee.companyId}</div><div className="text-xs text-slate-500">{names.branch.get(employee.branchId) || employee.branchId}</div></td>
         <td><div>{names.department.get(employee.departmentId) || employee.departmentId}</div><div className="text-xs text-slate-500">{names.position.get(employee.positionId) || employee.positionId}</div></td>
         <td><div>{employee.phone || '-'}</div><div className="text-xs text-slate-500">{employee.email || '-'}</div></td><td><Status active={employee.isActive} /></td>
-        <td><div className="flex gap-2"><button type="button" className="erp-action-btn erp-action-btn--edit" onClick={() => openEdit(employee)}>Edit</button><button type="button" className="erp-action-btn erp-action-btn--delete" onClick={() => handleDelete(employee)}>Delete</button></div></td>
+        <td><div className="flex flex-wrap gap-2"><button type="button" className="erp-action-btn" onClick={() => setDetailEmployee(employee)}>Detail</button><button type="button" className="erp-action-btn erp-action-btn--edit" onClick={() => openEdit(employee)}>Edit</button><button type="button" className="erp-action-btn erp-action-btn--delete" onClick={() => handleDelete(employee)}>Delete</button></div></td>
       </tr>)}</tbody></table></div>}
     </section>
   </div>
   {isFormOpen && <EmployeeModal form={form} lookups={lookups} editing={!!editingId} saving={isSubmitting} error={error} onChange={change} onAddressChange={changeAddress} onAddAddress={addAddress} onRemoveAddress={removeAddress} onClose={closeForm} onSubmit={handleSubmit} />}
+  {detailEmployee && <EmployeeDetailModal employee={detailEmployee} lookups={lookups} onClose={() => setDetailEmployee(null)} onEdit={() => { const employee = detailEmployee; setDetailEmployee(null); openEdit(employee) }} />}
   </main>
 }
+
+function EmployeeDetailModal({ employee, lookups, onClose, onEdit }: { employee: Employee; lookups: Lookups; onClose: () => void; onEdit: () => void }) {
+  const lookupName = (items: NamedItem[], id?: string | null) => items.find((item) => item.id === id)?.nameTh || items.find((item) => item.id === id)?.nameEn || items.find((item) => item.id === id)?.code || id || '-'
+
+  return <div className="app-scrollbar fixed inset-0 z-50 overflow-y-auto overscroll-contain bg-slate-950/55 backdrop-blur-sm">
+    <div className="fixed inset-0" onClick={onClose} aria-hidden="true" />
+    <article className="relative z-10 mx-auto min-h-[100dvh] w-full max-w-5xl bg-slate-50 shadow-2xl sm:my-5 sm:min-h-0 sm:rounded-[1.5rem] sm:border sm:border-slate-200">
+      <header className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-200 bg-white/95 px-4 py-4 backdrop-blur sm:rounded-t-[1.5rem] sm:px-6">
+        <div className="flex min-w-0 items-center gap-3"><div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-violet-100 font-bold text-violet-700">{employee.firstName.charAt(0) || 'E'}</div><div className="min-w-0"><p className="text-xs font-semibold uppercase tracking-[.14em] text-violet-700">Employee detail</p><h2 className="truncate text-xl font-semibold text-slate-950">{employee.firstName} {employee.lastName}</h2><p className="text-xs text-slate-500">{employee.employeeCode}</p></div></div>
+        <button type="button" className="grid h-9 w-9 place-items-center rounded-full text-xl text-slate-500 hover:bg-slate-100" onClick={onClose} aria-label="Close">×</button>
+      </header>
+
+      <div className="space-y-5 p-4 pb-24 sm:p-6 sm:pb-24">
+        <DetailSection title="ข้อมูลส่วนตัว"><DetailGrid items={[
+          ['ชื่อ-นามสกุล', `${employee.firstName} ${employee.lastName}`], ['ชื่อเล่น', employee.nickname], ['อีเมล', employee.email], ['โทรศัพท์', employee.phone], ['สถานะ', employee.isActive ? 'Active' : 'Inactive'],
+        ]} /></DetailSection>
+        <DetailSection title="โครงสร้างองค์กร"><DetailGrid items={[
+          ['บริษัท', lookupName(lookups.companies, employee.companyId)], ['สาขา', lookupName(lookups.branches, employee.branchId)], ['ฝ่าย', lookupName(lookups.sides, employee.sideId)], ['แผนก', lookupName(lookups.departments, employee.departmentId)], ['ตำแหน่ง', lookupName(lookups.positions, employee.positionId)], ['กลุ่มพนักงาน', lookupName(lookups.groups, employee.employeeGroupId)],
+        ]} /></DetailSection>
+        <DetailSection title="การเชื่อมโยงระบบ"><DetailGrid items={[[ 'Job Title ID', employee.jobTitleId ], [ 'User ID', employee.userId ]]} /></DetailSection>
+        <DetailSection title={`ที่อยู่ (${employee.employeeAddresses?.length ?? 0})`}>
+          {!employee.employeeAddresses?.length ? <p className="text-sm text-slate-500">ไม่มีข้อมูลที่อยู่</p> : <div className="grid gap-4 md:grid-cols-2">{employee.employeeAddresses.map((address, index) => <div key={address.id ?? index} className="rounded-xl border border-slate-200 bg-slate-50 p-4"><p className="mb-2 text-xs font-semibold uppercase tracking-wider text-violet-700">Address {index + 1}</p><p className="text-sm leading-6 text-slate-700">{address.address1}<br />{address.address2 && <>{address.address2}<br /></>}{address.city}, {address.state} {address.postalCode}<br />{address.country}</p></div>)}</div>}
+        </DetailSection>
+      </div>
+
+      <footer className="sticky bottom-0 z-20 flex justify-end gap-3 border-t border-slate-200 bg-white/95 px-4 pb-[max(.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur sm:rounded-b-[1.5rem] sm:px-6"><button type="button" className="btn btn-ghost" onClick={onClose}>Close</button><button type="button" className="erp-primary-btn" onClick={onEdit}>Edit Employee</button></footer>
+    </article>
+  </div>
+}
+
+function DetailSection({ title, children }: { title: string; children: React.ReactNode }) { return <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"><h3 className="mb-4 font-semibold text-slate-900">{title}</h3>{children}</section> }
+function DetailGrid({ items }: { items: Array<[string, string | null | undefined]> }) { return <dl className="grid gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">{items.map(([label, value]) => <div key={label} className="min-w-0"><dt className="text-xs font-medium text-slate-500">{label}</dt><dd className="mt-1 break-words text-sm font-medium text-slate-800">{value || '-'}</dd></div>)}</dl> }
 
 function EmployeeModal({ form, lookups, editing, saving, error, onChange, onAddressChange, onAddAddress, onRemoveAddress, onClose, onSubmit }: { form: Employee; lookups: Lookups; editing: boolean; saving: boolean; error: string; onChange: (field: keyof Employee, value: string | boolean) => void; onAddressChange: (index: number, field: keyof EmployeeAddress, value: string) => void; onAddAddress: () => void; onRemoveAddress: (index: number) => void; onClose: () => void; onSubmit: (event: React.FormEvent) => void }) {
   const sections = [
@@ -150,7 +184,7 @@ function EmployeeModal({ form, lookups, editing, saving, error, onChange, onAddr
               </FormSection>
 
               <FormSection id="employee-system" title="การเชื่อมโยงระบบ" description="ข้อมูลสำหรับเชื่อมต่อสิทธิ์และ Master Data อื่น">
-                <div className="grid gap-4 md:grid-cols-2"><Field label="Job Title ID" value={form.jobTitleId ?? ''} onChange={(value) => onChange('jobTitleId', value)} /><Field label="User ID" value={form.userId ?? ''} onChange={(value) => onChange('userId', value)} /></div>
+                <div className="grid gap-4 md:grid-cols-2"><Field label="Job Title ID" value={form.jobTitleId ?? ''} onChange={(value) => onChange('jobTitleId', value)} />{form.userId && <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3"><p className="text-sm font-medium text-slate-700">User ID</p><p className="mt-1 break-all text-xs text-slate-500">{form.userId}</p><p className="mt-1 text-xs text-slate-400">ข้อมูลนี้จัดการโดยระบบและไม่ถูกส่งใน employee payload</p></div>}</div>
                 <label className="mt-4 flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3"><span><span className="block text-sm font-semibold text-slate-800">สถานะการใช้งาน</span><span className="block text-xs text-slate-500">พนักงานที่ Active จะสามารถนำไปใช้อ้างอิงในระบบได้</span></span><input type="checkbox" className="erp-checkbox" checked={form.isActive} onChange={(event) => onChange('isActive', event.target.checked)} /></label>
               </FormSection>
 
@@ -171,10 +205,8 @@ function FormSection({ id, title, description, action, children }: { id: string;
 }
 
 type NamedItem = { id?: string; companyId?: string; code: string; nameTh: string; nameEn?: string | null }
-function toAddressPayload(address: EmployeeAddress): EmployeeAddress {
+function toAddressPayload(address: EmployeeAddress): EmployeePayload['addresses'][number] {
   return {
-    ...(address.id ? { id: address.id } : {}),
-    ...(address.employeeId ? { employeeId: address.employeeId } : {}),
     address1: address.address1.trim(),
     address2: address.address2?.trim() || null,
     city: address.city.trim(),

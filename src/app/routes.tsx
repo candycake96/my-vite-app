@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { AppShell } from './layout/AppShell'
+import { LoginPage } from '../modules/auth/pages/LoginPage'
 import { OrgSetupPage } from '../modules/master-data/org/pages/OrgSetupPage.tsx'
 import { OverviewPage } from '../modules/master-data/overview/pages/OverviewPage.tsx'
 import { CompanyPage } from '../modules/master-data/company/pages/CompanyPage.tsx'
@@ -16,6 +17,7 @@ import { StockCountPage } from '../modules/inventory/pages/StockCountPage.tsx'
 export default function AppRoutes() {
   return (
     <Routes>
+      <Route path="/login" element={<LoginPage />} />
       <Route path="/" element={<AppShell />}>
         <Route index element={<Navigate to="/home" replace />} />
         <Route path="home" element={<HomePage />} />
